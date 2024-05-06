@@ -25,7 +25,8 @@ rm -f grad.txt
 rm -f grad1.txt
 rm -f grad2.txt
 rm -f grada.txt
-egrep -A$Gread "Forces " $1 > grad1.txt
+#egrep -A$Gread "Forces " $1 > grad1.txt
+egrep -A$Gread "Forces \(Hartrees\/Bohr\)" $1 > grad1.txt
 tail -$Atoms grad1.txt > grad2.txt
 echo "gradient" >> grada.txt
 cat grada.txt grad2.txt >> grad.txt

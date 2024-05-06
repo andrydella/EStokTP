@@ -146,6 +146,7 @@ cadl end modified part
       ix2z_wellp=0
       ix2z_ts=0
       ix2z_ut=0
+      iz2x_ut=0
       iintfr_ts=0
       i1dtau_reac1=0
       i1dtau_reac2=0
@@ -475,6 +476,10 @@ cadl end modified part
          ix2z_ut=1
          itotcalc=itotcalc+1
       endif
+      if (WORD.EQ.'Z2X_UT') then
+         iz2x_ut=1
+         itotcalc=itotcalc+1
+      endif
       if (WORD.EQ.'BMAT_REAC1') then
          ibmat_reac1=1
          itotcalc=itotcalc+1
@@ -620,8 +625,10 @@ c  lc:   TolNum implicitly defined in double precision
          if (WORD2.EQ.'INF_HL') ipottype=6
       endif
       if (WORD.EQ.'VRC_TST') then
+         ismooth=0
          ivrctst=1
          itotcalc=itotcalc+1
+         if (WORD2.EQ.'SMOOTH') ismooth=1
       endif
       if (WORD.EQ.'NA_TST') then
          inatst=1
@@ -996,6 +1003,11 @@ c         if (idebug.ge.1) write (6,*) 'computing zmat'
          ispecies=666
          call xyz_to_int(ispecies)
       endif
+      if (iz2x_ut.eq.1) then
+c         if (idebug.ge.1) write (6,*) 'computing zmat'
+         ispecies=666
+         call int_to_xyz(ispecies)
+      endif
 
 c determine 1-dimensional torsional potentials
       if (i1dtau_reac1.eq.1) then
@@ -1214,7 +1226,7 @@ c perform correction to potential
 c perform VRC-TST 
       if (ibarr.gt.1.and.ivrctst.eq.1) then
          numproc=numprochl
-         call vrc_tst   
+         call vrc_tst(ismooth)   
       endif
 
 c perform NA-TST 
@@ -1295,7 +1307,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension tauopt(ntaumx)
 
       character*300 comline1,comline2
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*20 bislab(ntaumx)
       character*5 nameout
@@ -1636,7 +1648,7 @@ cc if linear molecule reacting with linear radical in abs assume TS is linear
       read (15,*) icharge,ispin
       if(ispecies.ne.51.and.ispecies.ne.61)then
          do iatom = 1 , natomt
-            read (15,'(A60)') atomlabel(iatom)
+            read (15,'(A80)') atomlabel(iatom)
          enddo
       endif
       rewind(15)
@@ -1832,7 +1844,7 @@ c        write (6,*) 'starting g09pot'
          if(ispecies.eq.51.or.ispecies.eq.61)then
             read (18,*)
             do iatom = 1 , natomt
-               read (18,'(A60)') atomlabel(iatom)
+               read (18,'(A80)') atomlabel(iatom)
             enddo
 c for abstraction in reverse direction label of breaking bond
             if(iabs.eq.1.and.ireverse.eq.1)then
@@ -2065,7 +2077,7 @@ c
       if(ispecies.eq.51.or.ispecies.eq.61)then
 c     $   or.ispecies.eq.5.or.ispecies.eq.6)then
          do iatom = 1 , natomt
-            write (17,'(A60)') atomlabel(iatom)
+            write (17,'(A80)') atomlabel(iatom)
          enddo
          do iint = 1 , nint
             write (17,*)intcoor(iint), xinto(iint,ioptmin)
@@ -2121,7 +2133,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension tauopt(ntaumx)
 
       character*300 comline1,comline2
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoors(3*natommx)
       character*30 intcoorsave(3*natommx)
@@ -2490,7 +2502,7 @@ c save key data
 
       write (26,*) 'grid optimized z-matrix'
       do iatom = 1 , natomt
-         write (26,'(A60)') atomlabel(iatom)
+         write (26,'(A80)') atomlabel(iatom)
       enddo
       do iint = 1 , nint
          write (26,*) intcoors(iint),xints(iint)
@@ -2529,8 +2541,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension drea(noptmx)
 
       character*300 comline1,comline2
-      character*60 atomlabel(natommx)
-      character*60 atomlabel1(natommx)
+      character*80 atomlabel(natommx)
+      character*80 atomlabel1(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoors(3*natommx)
       character*20 bislab(ntaumx)
@@ -3005,8 +3017,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension tauopt(ntaumx)
 
       character*300 comline1,comline2
-      character*60 atomlabel(natommx)
-      character*60 atomlabel1(natommx)
+      character*80 atomlabel(natommx)
+      character*80 atomlabel1(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoors(3*natommx)
       character*20 bislab(ntaumx)
@@ -3304,8 +3316,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension tauopt(ntaumx)
 
       character*300 comline1,comline2
-      character*60 atomlabel(natommx)
-      character*60 atomlabel1(natommx)
+      character*80 atomlabel(natommx)
+      character*80 atomlabel1(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoors(3*natommx)
       character*20 bislab(ntaumx)
@@ -3669,7 +3681,7 @@ c      rts = xints(natomtp+6)
       open (unit=37,file='./output/ts_opt.out',status='unknown')
       write (37,*) 'TS_z-matrix'
       do iatom = 1 , natomt
-         write (37,'(A60)') atomlabel(iatom)
+         write (37,'(A80)') atomlabel(iatom)
       enddo
       do iint = 1 , nint
          write (37,*) intcoor(iint),xints(iint)
@@ -3698,7 +3710,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension tauopt(ntaumx)
 
       character*300 comline1,comline2
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoors(3*natommx)
       character*30 intcoorsave(3*natommx)
@@ -4042,7 +4054,7 @@ c save key data
 
       write (26,*) 'grid optimized z-matrix'
       do iatom = 1 , natomt
-         write (26,'(A60)') atomlabel(iatom)
+         write (26,'(A80)') atomlabel(iatom)
       enddo
       do iint = 1 , nint
          write (26,*) intcoors(iint),xints(iint)
@@ -4063,7 +4075,7 @@ c save key data
 
       write (37,*) 'TS_z-matrix'
       do iatom = 1 , natomt
-         write (37,'(A60)') atomlabel(iatom)
+         write (37,'(A80)') atomlabel(iatom)
       enddo
       do iint = 1 , nint
          write (37,*) intcoor(iint),xints(iint)
@@ -4096,8 +4108,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       character*1 atfirstlet
 
       character*300 comline1,comline2
-      character*60 atomlabel(natommx)
-      character*60 atomlabel1(natommx)
+      character*80 atomlabel(natommx)
+      character*80 atomlabel1(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoori(3*natommx)
       character*30 intcoors(3*natommx)
@@ -4776,7 +4788,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension tauopt(ntaumx)
 
       character*300 comline1,comline2
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*20 bislab(ntaumx)
       character*30 gmem
@@ -4952,7 +4964,7 @@ c
       go to 1000
  1500 continue 
       do iatom = 1 , natomt
-         read (26,'(A60)') atomlabel(iatom)
+         read (26,'(A80)') atomlabel(iatom)
 c        write (6,*) 'atomlabel',atomlabel(iatom)
       enddo 
       nint = 3*natom-6
@@ -5008,7 +5020,7 @@ cc added to save optimized TS z-matrix coordinates
       write (36,*) vtotr
       write (36,*) 'TS_z-matrix'
       do iatom = 1 , natomt
-         write (36,'(A60)') atomlabel(iatom)
+         write (36,'(A80)') atomlabel(iatom)
       enddo
       do iint = 1 , nint
          write (36,*) intcoor(iint),xint(iint)
@@ -5024,7 +5036,7 @@ cc this is updated by the higher level TS search and random torsional scan subs
 
       write (37,*) 'TS_z-matrix'
       do iatom = 1 , natomt
-         write (37,'(A60)') atomlabel(iatom)
+         write (37,'(A80)') atomlabel(iatom)
       enddo
       do iint = 1 , nint
          write (37,*) intcoor(iint),xint(iint)
@@ -5067,7 +5079,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       real *8 mtrandom
 
       character*300 comline1,comline2
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoori(3*natommx)
       character*20 bislab(ntaumx)
@@ -5310,7 +5322,7 @@ c input template data
       go to 1000
  1500 continue 
       do iatom = 1 , natomt
-         read (36,'(A60)') atomlabel(iatom)
+         read (36,'(A80)') atomlabel(iatom)
          write (6,*) 'atomlabel',atomlabel(iatom)
       enddo 
 
@@ -5663,7 +5675,7 @@ c         call commrun(command1)
             open (unit=98,file='tsgeom.tmp',status='unknown')
             write (98,*) 'TS_z-matrix'
             do iatom = 1 , natomt
-               write (98,'(A60)') atomlabel(iatom)
+               write (98,'(A80)') atomlabel(iatom)
             enddo
             if(ifrozrts.ne.1)then
                do iint = 1 , nint
@@ -5867,7 +5879,7 @@ cc this is updated by the higher level TS search and random dihedral scans
 
       write (37,*) 'TS_z-matrix'
       do iatom = 1 , natomt
-         write (37,'(A60)') atomlabel(iatom)
+         write (37,'(A80)') atomlabel(iatom)
       enddo
       if (ifrozrts.ne.1)then
          do iint = 1 , nint
@@ -5900,7 +5912,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       character*300 comline3,comline4
       character*70 geomline
       character*30 intcoor(3*natommx)
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*100 command1
       character*100 commandcopy
       character*480 LongCommand
@@ -6560,7 +6572,7 @@ c     natomt is to account for dummy atoms
          enddo
          read (15,*) icharge,ispin 
         do iatom = 1 , natomt
-            read (15,'(A60)') atomlabel(iatom)
+            read (15,'(A80)') atomlabel(iatom)
          enddo
          rewind(15)
 
@@ -6765,6 +6777,13 @@ c         stop
             enddo
          endif
 c         rewind(21)
+         if(word3.eq.'RESTART') then
+            open (unit=99,status='unknown')
+            write (99,*) word4
+            rewind (99)
+            read (99,*) ires
+            close (unit=99,status='keep')
+         endif
          if(word2.eq.'G09'.or.word2.eq.'G16') then
             if(word2.eq.'G09') ilev1code=1
             if(word2.eq.'G16') ilev1code=3
@@ -6782,13 +6801,6 @@ c         rewind(21)
             write (66,*) 'g09,g16 or molpro in theory.dat'
             stop
          endif
-         if(word3.eq.'RESTART') then
-            open (unit=99,status='unknown')
-            write (99,*) word4
-            rewind (99)
-            read (99,*) ires
-            close (unit=99,status='keep')
-         endif
 c         if(ispecies.eq.0) then
 c            do while (WORD.NE.'AS_LEVEL1')
 c               call LineRead (21)
@@ -6803,7 +6815,6 @@ c         endif
 
          close(21)
 
-c      write(7,*)'int sub level1b'
 c      close(7)
 c      stop
 
@@ -6885,6 +6896,7 @@ c        natomt = natomt1+natomt2+1
          
          ibarrfr=0
          ib_froz=0
+         id_dis=0
          if(ibarr.gt.1)then
             rewind(15)
             do while (WORD.NE.'IBOND')
@@ -6898,6 +6910,13 @@ c        natomt = natomt1+natomt2+1
             if(word2.eq.'ANG'.and.word3.eq.'DIH')ib_froz=3
             if(word3.eq.'ANG'.and.word2.eq.'DIH')ib_froz=3
             if(word4.eq.'ALL')ib_froz=5
+            if(word2.eq.'ANG'.and.word3.eq.'DIH_DIS')ib_froz=3
+            if(word3.eq.'ANG'.and.word2.eq.'DIH_DIS')ib_froz=3
+            if(word4.eq.'ALL')ib_froz=5
+            if(word2.eq.'ALL')ib_froz=5
+            if(word2.eq.'DIH_DIS')id_dis=1
+            if(word3.eq.'DIH_DIS')id_dis=1
+
             read (15,*) ireact,rdist
             frozcoo=rdist
 
@@ -6939,7 +6958,7 @@ c gaussian com file data
          read (17,*)
          if (idebug.ge.2) write (6,*) ' starting gaussian input'
          do iatom = 1 , natomt
-            read (17,'(A60)') atomlabel(iatom)
+            read (17,'(A80)') atomlabel(iatom)
          enddo
 
 cc identify frozen coordinates in barrierless reactions
@@ -7026,7 +7045,12 @@ c and isomerization reactions
                if(word2.eq.'ANG')ib_froz=2
                if(word2.eq.'ANG'.and.word3.eq.'DIH')ib_froz=3
                if(word3.eq.'ANG'.and.word2.eq.'DIH')ib_froz=3
+               if(word2.eq.'ANG'.and.word3.eq.'DIH_DIS')ib_froz=3
+               if(word3.eq.'ANG'.and.word2.eq.'DIH_DIS')ib_froz=3
                if(word4.eq.'ALL')ib_froz=5
+               if(word2.eq.'ALL')ib_froz=5
+               if(word2.eq.'DIH_DIS')id_dis=1
+               if(word3.eq.'DIH_DIS')id_dis=1
                read (99,*) ireact,rdist
             endif
             close(99)
@@ -7211,6 +7235,23 @@ cc move to end frozen coordinates for barrierless reactions
             endif
          enddo
       endif
+      if(id_dis.eq.1)then
+         check=abs(xint(ncoord-2)-180.)
+         check1=abs(xint(ncoord-2)-360.)
+         check2=abs(xint(ncoord-2)-0.)
+         if(check.lt.2)then
+            xint(ncoord-2)=xint(ncoord-2)+5.0
+         endif
+         if(check1.lt.2)then
+            xint(ncoord-2)=xint(ncoord-2)+5.0
+         endif
+         if(check2.lt.2)then
+            xint(ncoord-2)=xint(ncoord-2)+5.0
+         endif
+c         write(*,*)'check is ',check
+c         write(*,*)'xint is ',xint(ncoord-2)
+c         stop
+      endif
 
       ixyz=0
       ired=0
@@ -7240,6 +7281,7 @@ cc move to end frozen coordinates for barrierless reactions
       endif
 c      if(ispecies.eq.1)ilin=ilin1
       write(*,*)'ilin is ',ilin
+      write(*,*)'ires is ',ires
 c      write(*,*)'ib_froz is',ib_froz
 c      stop
 
@@ -8227,7 +8269,7 @@ cc    this is the hindered rotor section
 
       character*300 comline1,comline2,comline3,comline4,comsave1,
      $ comsave2
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*4 atomname(natommx)
       character*4 atomconn(natommx)
       character*4 atomcoo(natommx)
@@ -8803,7 +8845,7 @@ c read level of theory for hindered rotor scan
          enddo
          read (15,*) icharge,ispin
          do iatom = 1 , natomt
-            read (15,'(A60)') atomlabel(iatom)
+            read (15,'(A80)') atomlabel(iatom)
          enddo
          rewind(15)
 
@@ -9168,7 +9210,7 @@ c now read z-mat input
          read (17,*)
          if (idebug.ge.2) write (6,*) ' starting gaussian input'
          do iatom = 1 , natomt
-            read (17,'(A60)') atomlabel(iatom)
+            read (17,'(A80)') atomlabel(iatom)
          enddo
 
 cc read coordinate names
@@ -10484,7 +10526,7 @@ cc    this is the multi dimensional hindered rotor section
       character*300 comline1,comline2,comline3,comline4,comsave1
       character*300 comline5,comline6,comlineref1
       character*300 comlineref2,comsave2
-      character*60 atomlabel(natommx),atomlabel_save(natommx)
+      character*80 atomlabel(natommx),atomlabel_save(natommx)
       character*4 atomname(natommx)
       character*4 atomconn(natommx)
       character*4 atomcoo(natommx)
@@ -11226,7 +11268,7 @@ c read level of theory for hindered rotor scan
          enddo
          read (15,*) icharge,ispin
          do iatom = 1 , natomt
-            read (15,'(A60)') atomlabel(iatom)
+            read (15,'(A80)') atomlabel(iatom)
             atomlabel_save(iatom)= atomlabel(iatom)
          enddo
          rewind(15)
@@ -11518,7 +11560,7 @@ c now read z-mat input
 
          if (idebug.ge.2) write (6,*) ' starting gaussian input'
          do iatom = 1 , natomt
-            read (17,'(A60)') atomlabel(iatom)
+            read (17,'(A80)') atomlabel(iatom)
             atomlabel_save(iatom)= atomlabel(iatom)
 c            write (6,*) atomlabel(iatom)
          enddo
@@ -13669,7 +13711,7 @@ c      dimension gelec(nelecmx),eelec(nelecmx)
 
       character*300 comline1,comline2,comline3,comline4,comsave1,
      $ comsave2
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*4 atomname(natommx)
       character*4 atomconn(natommx)
       character*4 atomcoo(natommx)
@@ -14030,7 +14072,7 @@ c now read xyz input
          open (unit=99,status='unknown')
          write(99,1201)cjunk,coox,cooy,cooz
          rewind(99)
-         read (99,'(A60)') atomlabel(iatom)
+         read (99,'(A80)') atomlabel(iatom)
          close(99)
       enddo
       if (idebug.ge.2) write (6,*) ' finished input section'
@@ -14053,7 +14095,7 @@ c      delete the file after the reading
       endif
       write(15,*)'Geometry ',natom
       do iatom = 1 , natom
-         write (15,'(A60)') atomlabel(iatom)
+         write (15,'(A80)') atomlabel(iatom)
       enddo
       close(15)
 
@@ -14163,18 +14205,18 @@ c               write(*,*)'energy is ',energy(iscan,ihind)
                      if(iatom.eq.isite.or.iatom.eq.(natom1+1))then
                         write(199,1204)cjunk,coox,cooy,cooz
                         rewind(199)
-                        read (199,'(A60)') atomlabel(iatom)
+                        read (199,'(A80)') atomlabel(iatom)
                         close(199)
                      else
                         write(199,1205)cjunk,coox,cooy,cooz
                         rewind(199)
-                        read (199,'(A60)') atomlabel(iatom)
+                        read (199,'(A80)') atomlabel(iatom)
                         close(199)
                      endif
                   else
                      write(199,1201)cjunk,coox,cooy,cooz
                      rewind(199)
-                     read (199,'(A60)') atomlabel(iatom)
+                     read (199,'(A80)') atomlabel(iatom)
                      close(199)
                   endif
                enddo
@@ -14455,7 +14497,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       character*20 hr_rescale,hr_rescale2f,hr_rescale2b,hr_rescale3
       character*300 comline1,comline2,comline3,comline4
 c      character*300 comline3,comline4
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoori(3*natommx)
       character*20 bislab(ntaumx)
@@ -14755,7 +14797,8 @@ c  reading z-mat
       read (17,*)
       if (idebug.ge.2) write (6,*) ' reading z-mat input'
       do iatom = 1 , natomt
-         read (17,'(A60)') atomlabel(iatom)
+         read (17,'(A80)') atomlabel(iatom)
+c         write (6,*) 'atlabel ',atomlabel(iatom)
       enddo
 
 cc read coordinate names
@@ -16396,7 +16439,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       character*300 comline1,comline2
       character*100 comline3
       character*30 intcoor(3*natommx)
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*100 command1
       character*100 commandcopy
       character*20 bislab(ntaumx)
@@ -17240,7 +17283,7 @@ c read and write z mat input
             call commrun(commandcopy)
 c            write (67,*)'geometry={angstrom'
             do iatom = 1 , natomt
-               read (15,'(A60)') atomlabel(iatom)
+               read (15,'(A80)') atomlabel(iatom)
 c               write (67,*)atomlabel(iatom)
             enddo
 c            write (67,*)'}'
@@ -17267,7 +17310,7 @@ c            write(67,*)' gaussian geom'
 c            write(67,*)
 c            write (67,*) icharge,ispin
             do iatom = 1 , natomt
-               read (15,'(A60)') atomlabel(iatom)
+               read (15,'(A80)') atomlabel(iatom)
 c               write (67,*)atomlabel(iatom)
             enddo
 c            write(67,*)
@@ -17278,7 +17321,7 @@ c            write(67,*)
      + "/' ./hl_composite.xyz"
             call commrun(command1)
             do iatom = 1 , natomt
-               read (15,'(A60)') atomlabel(iatom)
+               read (15,'(A80)') atomlabel(iatom)
             enddo
             rewind(15)
          else
@@ -17578,7 +17621,7 @@ c               ntot=natom
                ntot=natomt
             endif
             do iatom = 1 , ntot
-               read (17,'(A60)') atomlabel(iatom)
+               read (17,'(A80)') atomlabel(iatom)
 c               write (67,*)atomlabel(iatom)
             enddo
 c            write (67,*)'}'
@@ -17598,7 +17641,7 @@ c            write (67,*)'}'
             read (17,*)
             if (idebug.ge.2) write (6,*) ' starting gaussian input'
             do iatom = 1 , natomt
-               read (17,'(A60)') atomlabel(iatom)
+               read (17,'(A80)') atomlabel(iatom)
             enddo
          else if (code_name.eq.'COMPOSITE') then
             call commrun(commandcopy)
@@ -17607,12 +17650,12 @@ c            write (67,*)'}'
             call commrun(command1)
             read (17,*)
             do iatom = 1 , natomt
-               read (17,'(A60)') atomlabel(iatom)
+               read (17,'(A80)') atomlabel(iatom)
             enddo
          else if (code_name.eq.'LEVEL1')then
             read (17,*)
             do iatom = 1 , natomt
-               read (17,'(A60)') atomlabel(iatom)
+               read (17,'(A80)') atomlabel(iatom)
             enddo
          endif
 
@@ -20325,7 +20368,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       CHARACTER*160 sename,word,word2,word3,title,title1,
      $ word4,word5,word6,word7
 
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*30 gmem
 
@@ -20380,7 +20423,7 @@ c first set of lines are just garbage from before
       write (116,*) 'entering atom reads',natomt1
       read (21,*)
       do iatom = 1 , natomt1
-         read (21,'(A60)') atomlabel(iatom)
+         read (21,'(A80)') atomlabel(iatom)
       enddo
       rewind(21)
 
@@ -20474,7 +20517,7 @@ c start with dummy atom for abstraction case
             end if
  1901       format (a4,1x,i4,1x,a2,1x,i4,1x,a3,1x,i4,1x,a4)
             REWIND (99)
-            read (99,'(A60)') atomlabel(iatom)
+            read (99,'(A80)') atomlabel(iatom)
             close (unit=99,status='keep')
          else if(natom1.eq.2.and.natomt1.eq.2)then
             OPEN (unit=99,status='unknown')
@@ -20486,7 +20529,7 @@ c start with dummy atom for abstraction case
  1902       format (a4,1x,i4,1x,a2,1x,i4,1x,a3,1x)
             end if
             REWIND (99)
-            read (99,'(A60)') atomlabel(iatom)
+            read (99,'(A80)') atomlabel(iatom)
             close (unit=99,status='keep')
          else if(natom1.eq.2.and.natomt1.eq.3)then
             OPEN (unit=99,status='unknown')
@@ -20500,7 +20543,7 @@ c start with dummy atom for abstraction case
  1903       format (a4,1x,i4,1x,a2,1x,i4,1x,a3,1x,i4,1x,a4)
             end if
             REWIND (99)
-            read (99,'(A60)') atomlabel(iatom)
+            read (99,'(A80)') atomlabel(iatom)
             close (unit=99,status='keep')
          endif
       endif
@@ -20534,7 +20577,7 @@ cc
 cc
       do iatom = iatomi , iatomf
 c     do iatom = natomt1+2 , natomt1+natomt2+1
-         read (22,'(A60)') atomlabel(iatom)
+         read (22,'(A80)') atomlabel(iatom)
 c         write (116,*) 'atomlabel reac_2b',atomlabel(iatom),iatom
          if (iatom.eq.iatomi) then
 c        if (iatom.eq.natomt1+2) then
@@ -20571,7 +20614,7 @@ c        if (iatom.eq.natomt1+2) then
  2601       format (1x,a8,1x,i4,1x,a3,1x,i4,1x,a5,1x,i4,1x,a5)
  2611       format (1x,a8,1x,i4,1x,a3,1x,i4,1x,a5)
             REWIND (99)
-            read (99,'(A60)') atomlabel(iatom)
+            read (99,'(A80)') atomlabel(iatom)
             write (116,*) 'atomlabel reac_3a',atomlabel(iatom)
             close (unit=99,status='keep')
          endif
@@ -20607,7 +20650,7 @@ c           write (99,2602) word,word2,word3,isite,'aabs2',
 c    $       natomt1+1,'babs2'
  2602       format (1x,3a8,1x,i4,1x,a5,1x,i4,1x,a5)
             REWIND (99)
-            read (99,'(A60)') atomlabel(iatom)
+            read (99,'(A80)') atomlabel(iatom)
 c            write (116,*) 'atomlabel reac_3b',atomlabel(iatom)
             close (unit=99,status='keep')
          endif
@@ -20627,7 +20670,7 @@ c    $       isite,'babs3'
      $       'babs3'
  2603       format (1x,5a8,1x,i4,1x,a5)
             REWIND (99)
-            read (99,'(A60)') atomlabel(iatom)
+            read (99,'(A80)') atomlabel(iatom)
             write (116,*) 'atomlabel reac_3c',atomlabel(iatom)
             close (unit=99,status='keep')
          endif
@@ -20838,7 +20881,7 @@ cc
      $       ' 90. ',natomt1,'babs2'
          endif
          rewind(99)
-         read (99,'(A60)') atomlabel(iatomi+1)
+         read (99,'(A80)') atomlabel(iatomi+1)
 c         write(*,*)'new atom label 1', atomlabel(iatomi+1)
 c         close(99)
 c         open (unit=99,status='unknown')
@@ -20850,7 +20893,7 @@ c         open (unit=99,status='unknown')
          write (99,2604) word,word2,word3,word4,
      $       word5,word6,'aabs2'
          rewind(99)
-         read (99,'(A60)') atomlabel(isub)         
+         read (99,'(A80)') atomlabel(isub)         
       endif
  2604 format (1x,3a7,1x,a7,1x,a7,1x,a7,1x,a7)
 
@@ -20898,8 +20941,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       CHARACTER*160 sename,word,word2,word3,title,title1,
      $ word4,word5,word6,word7
 
-      character*60 atomlabel(natommx)
-      character*60 atomlabel1(natommx)
+      character*80 atomlabel(natommx)
+      character*80 atomlabel1(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoort(3*natommx)
       character*30 gmem
@@ -20925,7 +20968,7 @@ c      write (116,*) 'WORD',WORD
       write (116,*) 'entering atom reads',natomt1
       read (21,*)
       do iatom = 1 , natomt1
-         read (21,'(A60)') atomlabel(iatom)
+         read (21,'(A80)') atomlabel(iatom)
       enddo
       rewind(21)
 
@@ -21172,14 +21215,14 @@ cc now update atomlabels
             open(unit=99,status='unknown')
             write(99,1202)cname1,cname2,cname3,aanglab
             rewind(99)
-            read(99,'(A60)')atomlabel1(iatom)
+            read(99,'(A80)')atomlabel1(iatom)
             close(99)
          else if(iatom.eq.ireact)then
             open(unit=99,status='unknown')
             write(99,1203)cname1,cname2,cname3,aanglab,cname4,
      $                    adihlab
             rewind(99)
-            read(99,'(A60)')atomlabel1(iatom)
+            read(99,'(A80)')atomlabel1(iatom)
             close(99)
          else
             atomlabel1(iatom)=atomlabel(iatom)
@@ -21265,8 +21308,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       CHARACTER*160 sename,word,word2,word3,title,title1,
      $ word4,word5,word6,word7
 
-      character*60 atomlabel(natommx)
-      character*60 atomlabel1(natommx)
+      character*80 atomlabel(natommx)
+      character*80 atomlabel1(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoort(3*natommx)
       character*30 gmem
@@ -21294,7 +21337,7 @@ c first set of lines are just garbage from before
       write (116,*) 'entering atom reads',natomt1
       read (21,*)
       do iatom = 1 , natomt1
-         read (21,'(A60)') atomlabel(iatom)
+         read (21,'(A80)') atomlabel(iatom)
       enddo
       rewind(21)
 
@@ -21940,7 +21983,7 @@ c      dimension natomnumb(natommx)
       character*20 stoichname
       character*60 command1
 
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*2 aname
       character*1 aname1(natommx)
       character*30 cjunk
@@ -22105,7 +22148,7 @@ c     natomt is to account for dummy atoms
          enddo
          read (15,*) icharge,ispin
          do iatom = 1 , natomt
-            read (15,'(A60)') atomlabel(iatom)
+            read (15,'(A80)') atomlabel(iatom)
          enddo
          rewind(15)
 
@@ -22326,7 +22369,7 @@ c gaussian com file data
          read (17,*)
          if (idebug.ge.2) write (66,*) ' starting gaussian input'
          do iatom = 1 , natomt
-            read (17,'(A60)') atomlabel(iatom)
+            read (17,'(A80)') atomlabel(iatom)
          enddo
 
 cc read coordinate names
@@ -22374,6 +22417,8 @@ c      do j=1,natomt
 c         write(*,*) 'iaconn ',j,iaconn(j)
 c         write(*,*) 'idconn ',j,idconn(j)
 c      enddo
+c
+      write(*,*)'past read zmat in sub bmat'
 c      stop
 cc this does not account for dummy atoms defined with  given quantities
 
@@ -22457,7 +22502,7 @@ c      stop
       call update_zmat(natom,natomt,intcoor,bislab,ibconn,iaconn
      $    ,idconn,bname,anname,dname,atname,coox,cooy,cooz,xinti,tauopt,
      $     ntau,idummy,ilin_fr,aconnt,bconnt,dconnt,atomlabel,ifilu)
-      if(xint(1).lt.1.0e-10)then
+      if(xinti(1).lt.1.0e-10)then
          write(7,*)
          write(7,*)'failed in updating geometry'
          write(7,*)'probably error of g09, check output'
@@ -24143,7 +24188,7 @@ c      dimension natomnumb(natommx)
       character*20 filename
       character*20 stoichname
       character*180 command1
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*300 comline1,comline2
       character*300 comline3,comline4
       character*30 gmem
@@ -24282,7 +24327,7 @@ c         open (unit=15,file='./data/ts.dat',status='unknown')
             open (unit=99,status='unknown')
             write(99,1201)cjunka,coox,cooy,cooz
             rewind(99)
-            read (99,'(A60)') atomlabel(iatom)
+            read (99,'(A80)') atomlabel(iatom)
             close(99)
          enddo
          close(17)
@@ -24588,7 +24633,7 @@ c      nfreq=3*natom-nhind-1-6
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc    
 
-      subroutine vrc_tst
+      subroutine vrc_tst(ismooth)
 
       implicit double precision (a-h,o-z)
       implicit integer (i-n)
@@ -25990,6 +26035,11 @@ c                  write(11,403)j,-aabs1
             else if (natom2.gt.2)then
                ip=ip+1
                iv=iv+1
+               if(ipivtot1.eq.1)then
+                  ip=ip-1
+                  iv=iv-1
+                  id=1
+               endif
                if(ip.lt.10)then
                write(11,304)ip,xsite4,id,iv,iv,ip,ysite4,id,iv,iv,ip,
      +              zsite4,id,iv
@@ -26222,7 +26272,7 @@ cc now create the correction potential input file for vrc calculations
       enddo
       close(99)
 
-cc reference infinte energy is assigned to npoints+1 position
+cc reference infinite distance energy is assigned to npoints+1 position
 
       filename='../100/me_files/potcorr_geom.me'
       open(unit=15,file=filename,status='unknown')
@@ -26246,14 +26296,34 @@ cc reference infinte energy is assigned to npoints+1 position
 
          potco_geom(j)=potco_geom(j)*627.5
          potco_hl(j)=potco_hl(j)*627.5
-         potco(j)=potco_geom(j)+potco_hl(j)
          pot_tot(j)=(pothlr(j)-pothlr(npoints+1))*627.5
 
-         write(11,*)rinp(j),potco(j)
          pzpe=0.
          pzpe=(potzpe(j)- potzpe(npoints+1))*627.5
-         write(14,603)rinp(j),potco_geom(j),potco_hl(j),pot_tot(j),pzpe
 c     +(potzpe(j)- potzpe(npoints+1))*627.5
+      enddo
+
+      if(ismooth.eq.1)then
+         do j=1,npoints
+            if(potco_geom(j).gt.0.)then
+               potco_geom(j)=0.
+            endif
+         enddo
+         do j=1,npoints-1
+            if(potco_geom(j+1).lt.potco_geom(j))then
+               potco_geom(j+1)=potco_geom(j)
+            endif
+         enddo
+      endif
+
+
+      do j=1,npoints
+         potco(j)=potco_geom(j)+potco_hl(j)
+         write(11,*)rinp(j),potco(j)
+      enddo
+
+      do j=1,npoints
+         write(14,603)rinp(j),potco_geom(j),potco_hl(j),pot_tot(j),pzpe
       enddo
 
       close(11)
@@ -26433,7 +26503,7 @@ c      character*300 comline1,comline2
 c      character*300 comline3,comline4
       character*300 comline1,comline2
       character*300 comline3,comline4
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoori(3*natommx)
       character*30 con_name(3*natommx)
@@ -26645,7 +26715,7 @@ c
          enddo
          read (15,*) icharge,ispin 
          do iatom = 1 , natomt
-            read (15,'(A60)') atomlabel(iatom)
+            read (15,'(A80)') atomlabel(iatom)
          enddo
          rewind(15)
 
@@ -26836,7 +26906,7 @@ cc condition for reading guess from grid
 
          if (idebug.ge.2) write (6,*) ' starting gaussian input'
          do iatom = 1 , natomt
-            read (17,'(A60)') atomlabel(iatom)
+            read (17,'(A80)') atomlabel(iatom)
          enddo
 
 cc read coordinate names
@@ -27487,7 +27557,7 @@ c check the correctness of the actual implementation
          open (unit=21,file='./output/na_mecp.out',status='old')
          read (21,*)
          do iatom = 1 , natomt
-            read (21,'(A60)') atomlabel(iatom)
+            read (21,'(A80)') atomlabel(iatom)
          enddo
          ncoord = 3*natom-6
          do iint = 1 , ncoord
@@ -27933,7 +28003,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension coord(natommx,ndim),xint(3*natommx),xinti(3*natommx),
      $ abcrot(ndim) 
 
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoori(3*natommx)
 
@@ -28890,11 +28960,44 @@ cc with full relaxation
 
       endif
 
-      open(unit=12,file='./me_files/potcorr_geom.me',status='unknown')
       open(unit=13,file='./geoms/tsgta_l1.xyz',status='unknown')
       read(13,*)cjunk
       read(13,*)vtotref
       close(13)
+
+      check=(-vtotr+vtotref)*627.5
+      check1=(-vtot_0+vtotref)*627.5
+      if(check.gt.1)then
+         if(abs(check1).lt.0.1)then
+            check=-1.0
+            vtotr=vtot_0
+         endif
+      endif
+      if(vtotr.gt.0)then
+         if(abs(check1).lt.0.1)then
+            check=-1.0
+            vtotr=vtot_0
+         endif
+      endif
+      if(check.gt.1.or.vtotr.gt.0)then
+         write(7,*)'failed in geom pot correction'
+         write(7,*)'in subroutine pot_corr'
+         write(7,*)'with vtotref-vtot ',check
+         write(7,*)'terminating code with error.'
+         write(7,*)'vtot_0 is ',vtot_0
+         write(7,*)'vtotref is ',vtotref
+         write(7,*)'check1 is ',check1
+         open(unit=99,file='failed',status='unknown')
+         write(99,*)'failed in geom pot correction'
+         write(99,*)'in subroutine pot_corr'
+         write(99,*)'with vtorref-vtot ',check
+         write(99,*)'vtot_0 is ',vtot_0
+         close(99)
+         stop
+      endif
+
+
+      open(unit=12,file='./me_files/potcorr_geom.me',status='unknown')
       write(12,*)vtotr
       write(12,*)vtotref
       write(12,*)natomt,nint
@@ -28913,11 +29016,13 @@ cc with full relaxation
          write(7,*)'failed in geom pot correction'
          write(7,*)'in subroutine pot_corr'
          write(7,*)'with vtotref-vtot ',check
-         write(7,*)'terminating code with error'
+         write(7,*)'terminating code with error.'
+         write(7,*)'vtot_0 is ',vtot_0
          open(unit=99,file='failed',status='unknown')
          write(99,*)'failed in geom pot correction'
          write(99,*)'in subroutine pot_corr'
          write(99,*)'with vtorref-vtot ',check
+         write(99,*)'vtot_0 is ',vtot_0
          close(99)
          stop
       endif
@@ -29267,7 +29372,7 @@ cc      open(unit=15,file='./me_files/potcorr_geom.me',status='unknown')
 cc      read(15,*)cjunk
 cc      read(15,*)cjunk
       do iatom = 1 , natomt
-         read(15,'(A60)')atomlabel(iatom)
+         read(15,'(A80)')atomlabel(iatom)
       enddo
 
 cc read coordinate names                                                                                 
@@ -29524,7 +29629,7 @@ c         endif
          read(15,*)cjunk
          do iatom = 1 , natomt
 c         do iatom = 1 , natom
-            read(15,'(A60)')atomlabel(iatom)
+            read(15,'(A80)')atomlabel(iatom)
          enddo
 c         write(*,*)'natomt is ',natomt
 c        stop
@@ -30014,7 +30119,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension taumn(ntaumx),taumx(ntaumx)
 
       character*300 comline1,comline2
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*20 bislab(ntaumx)
       character*20 cjunk
@@ -30104,7 +30209,7 @@ c            read (15,*) bislab(itau),taumn(itau),taumx(itau)
       enddo
       read (15,*) icharge,ispin
       do iatom = 1 , natomt
-         read (15,'(A60)') atomlabel(iatom)
+         read (15,'(A80)') atomlabel(iatom)
       enddo
       rewind(15)
 
@@ -30575,7 +30680,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       character*300 comline1,comline2
       character*30 intcoor(3*natommx)
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*20 bislab(ntaumx)
       character*30 cjunk
       character*30 gmem
@@ -31005,8 +31110,8 @@ c    Requires both REAC1 and PROD1 structures
       dimension drea(noptmx)
 
       character*300 comline1,comline2,copystuff
-      character*60 atomlabel(natommx)
-      character*60 atomlabel1(natommx)
+      character*80 atomlabel(natommx)
+      character*80 atomlabel1(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoors(3*natommx)
       character*20 bislab(ntaumx)
@@ -31459,7 +31564,7 @@ c  reading z-mat
       call LineRead (15)
       if (idebug.GE.2) write (26,*) 'reading z-mat input'
       do iatom = 1 , natomt1
-         read (15,'(A60)') atomlabel(iatom)
+         read (15,'(A80)') atomlabel(iatom)
 c         write (26,*) atomlabel(iatom)
       enddo
 c read coordinate names
@@ -32246,8 +32351,8 @@ c      dimension natomnumb(natommx)
       dimension xintpp(3*natommx),xintpn(3*natommx)
       dimension xintnp(3*natommx),xintnn(3*natommx)
 
-      dimension bmat(3*natommx,3*natommx)
-      dimension cmat(3*natommx,3*natommx,3*natommx)
+c      dimension bmat(3*natommx,3*natommx)
+c      dimension cmat(3*natommx,3*natommx,3*natommx)
 
       dimension coox(natommx),cooy(natommx),cooz(natommx)
       dimension cooxn(natommx),cooyn(natommx),coozn(natommx)
@@ -32278,7 +32383,7 @@ c      dimension natomnumb(natommx)
       character*20 stoichname
       character*60 command1
 
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*2 aname
       character*1 aname1(natommx)
       character*30 cjunk
@@ -32455,7 +32560,7 @@ c     natomt is to account for dummy atoms
          enddo
          read (15,*) icharge,ispin
          do iatom = 1 , natomt
-            read (15,'(A60)') atomlabel(iatom)
+            read (15,'(A80)') atomlabel(iatom)
          enddo
          rewind(15)
 
@@ -32676,7 +32781,7 @@ c gaussian com file data
          read (17,*)
          if (idebug.ge.2) write (66,*) ' starting gaussian input'
          do iatom = 1 , natomt
-            read (17,'(A60)') atomlabel(iatom)
+            read (17,'(A80)') atomlabel(iatom)
          enddo
 
 cc read coordinate names
@@ -32720,7 +32825,7 @@ c         write(66,*)'ok up to here'
          enddo
          read (15,*) icharge,ispin
          do iatom = 1 , natomt
-            read (15,'(A60)') atomlabel(iatom)
+            read (15,'(A80)') atomlabel(iatom)
          enddo
          rewind(15)
 
@@ -32944,6 +33049,745 @@ c         endif
       END
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      subroutine int_to_xyz(ispecies)
+
+      implicit double precision (a-h,o-z)
+      implicit integer (i-n)
+
+      include 'data_estoktp.fi'
+      include 'param_estoktp.fi'
+
+c      dimension natomnumb(natommx)
+      dimension tau(ntaumx),taumn(ntaumx),taumx(ntaumx),freq(nmdmx)
+      dimension coord(natommx,ndim),xint(3*natommx),xinti(3*natommx),
+     $ abcrot(ndim),xintt(3*natommx)
+
+      dimension xintp(3*natommx),xintn(3*natommx)
+      dimension xintpp(3*natommx),xintpn(3*natommx)
+      dimension xintnp(3*natommx),xintnn(3*natommx)
+
+c      dimension bmat(3*natommx,3*natommx)
+c      dimension cmat(3*natommx,3*natommx,3*natommx)
+
+      dimension coox(natommx),cooy(natommx),cooz(natommx)
+      dimension cooxn(natommx),cooyn(natommx),coozn(natommx)
+      dimension cooxp(natommx),cooyp(natommx),coozp(natommx)
+
+      dimension cooxpp(natommx),cooypp(natommx),coozpp(natommx)
+      dimension cooxnp(natommx),cooynp(natommx),cooznp(natommx)
+      dimension cooxpn(natommx),cooypn(natommx),coozpn(natommx)
+      dimension cooxnn(natommx),cooynn(natommx),cooznn(natommx)
+
+      dimension cooxyz(3*natommx)
+      dimension ibconn(natommx),iaconn(natommx),idconn(natommx)
+      dimension idummy(natommx),iangind(3*natommx)
+      dimension ianginda(3*natommx),iangindd(3*natommx)
+      dimension idihed(natommx)
+      dimension bval(natommx),aval(natommx),dval(natommx)
+
+
+      LOGICAL leof,lsec,ltit
+      CHARACTER*1000 line,string
+      CHARACTER*160 sename,word,word2,word3,title,title1,
+     $ word4,word5,word6,word7
+
+      character*20 bname(natommx),anname(natommx),dname(natommx)
+     $ ,atname(natommx),bconnt(natommx),aconnt(natommx),dconnt(natommx)
+
+      character*20 filename
+      character*20 stoichname
+      character*60 command1
+
+      character*80 atomlabel(natommx)
+      character*2 aname
+      character*1 aname1(natommx)
+      character*30 cjunk
+      character*30 angsub1,angsub2
+      character*30 nameout,nameoutc
+      character*30 gmem
+      character*30 intcoor(3*natommx)
+      character*30 intcoorM(3*natommx)
+      character*30 intcoort(3*natommx)
+      character*20 bislab(ntaumx)
+
+      include 'filcomm.f'
+
+      if (ispecies.eq.1) then
+         open (unit=15,file='./data/reac1.dat',status='old')
+c         open (unit=17,file='./output/reac1_opt.out',status='unknown')
+c         if(ifile.eq.0)then
+c            open (unit=18,file='./geoms/reac1_l1.xyz',status='unknown')
+c         endif
+         nameout='reac1_zmat'
+c         nameoutc='reac1_cmat'
+         inp_type=1
+      endif
+      if (ispecies.eq.2) then
+         open (unit=15,file='./data/reac2.dat',status='old')
+c        open (unit=17,file='./output/reac2_opt.out',status='unknown')
+c         if(ifile.eq.0)then
+c            open (unit=18,file='./geoms/reac2_l1.xyz',status='unknown')
+c         endif
+         nameout='reac2_zmat'
+c         nameoutc='reac2_cmat'
+         inp_type=1
+      endif
+      if (ispecies.eq.3) then
+         open (unit=15,file='./data/prod1.dat',status='old')
+c         open (unit=17,file='./output/prod1_opt.out',status='unknown')
+c         if(ifile.eq.0)then
+c            open (unit=18,file='./geoms/prod1_l1.xyz',status='unknown')
+c         endif
+         nameout='prod1_zmat'
+c         nameoutc='prod1_cmat'
+         inp_type=1
+      endif
+      if (ispecies.eq.4) then
+         open (unit=15,file='./data/prod2.dat',status='old')
+c         open (unit=17,file='./output/prod2_opt.out',status='unknown')
+c         if(ifile.eq.0)then
+c            open (unit=18,file='./geoms/prod2_l1.xyz',status='unknown')
+c         endif
+         nameout='prod2_zmat'
+c         nameoutc='prod2_cmat'
+         inp_type=1
+      endif
+      if (ispecies.eq.5) then
+         open (unit=15,file='./data/wellr.dat',status='old')
+c         open (unit=17,file='./output/wellr_opt.out',status='unknown')
+c         if(ifile.eq.0)then
+c            open (unit=18,file='./geoms/wellr_l1.xyz',status='unknown')
+c         endif
+         nameout='wellr_zmat'
+c         nameoutc='wellr_cmat'
+         inp_type=2
+      endif
+      if (ispecies.eq.6) then
+         open (unit=15,file='./data/wellp.dat',status='old')
+c         open (unit=17,file='./output/wellp_opt.out',status='unknown')
+c         if(ifile.eq.0)then
+c            open (unit=18,file='./geoms/wellp_l1.xyz',status='unknown')
+c         endif
+         nameout='wellp_zmat'
+c         nameoutc='wellp_cmat'
+         inp_type=1
+      endif
+      if (ispecies.eq.51) then
+         open (unit=15,file='./data/wellp.dat',status='old')
+         if(igeom_wellr.eq.2)then
+            open (unit=17,file='./output/ts_opt.out',status='unknown')
+         else
+            open(unit=17,file='./output/wellp_opt.out',status='unknown')
+         endif
+c         if(ifile.eq.0)then
+c            open (unit=18,file='./geoms/wellr_l1.xyz',status='unknown')
+c         endif
+         nameout='wellr_zmat'
+c         nameoutc='wellr_cmat'
+         inp_type=2
+      endif
+      if (ispecies.eq.61) then
+         open (unit=15,file='./data/wellp.dat',status='old')
+         if(igeom_wellp.eq.2)then
+            open (unit=17,file='./output/ts_opt.out',status='unknown')
+         else
+            open(unit=17,file='./output/wellp_opt.out',status='unknown')
+         endif
+c         if(ifile.eq.0)then
+c            open (unit=18,file='./geoms/wellp_l1.xyz',status='unknown')
+c         endif
+         nameout='wellp_zmat'
+c         nameoutc='wellp_cmat'
+         inp_type=2
+      endif
+      if (ispecies.eq.0) then
+         open (unit=15,file='./data/ts.dat',status='old')
+         open (unit=17,file='./output/ts_opt.out',status='unknown')
+c         if(ifile.eq.0)then
+c            open (unit=18,file='./geoms/tsgta_l1.xyz',status='unknown')
+c         endif
+         nameout='tsgta_zmat'
+c         nameoutc='tsgta_cmat'
+         inp_type=2
+      endif
+      if (ispecies.eq.17) then
+         open (unit=15,file='./data/ts.dat',status='old')
+         open (unit=17,file='./output/na_mecp.out',status='unknown')
+         nameout='na_mecp_zmat'
+c         nameoutc='na_mecp_zmat'
+         inp_type=2
+      endif
+
+      if (ispecies.eq.666) then
+         open (unit=15,file='es2k_ut.dat',status='old')
+         nameout='z2x_cart'
+c         nameoutc='na_mecp_zmat'
+         inp_type=3
+      endif
+
+
+      if (ispecies.ne.666) then
+         open (unit=66,file='./output/zmat_to_xyz.log',status='unknown')
+      else
+         open (unit=66,file='zmat_to_xyz.log',status='unknown')
+      endif
+cc initialize parameters and files
+c
+c      if(ifile.eq.1)then         
+c         open (unit=18,file='geom_bmat.xyz',status='unknown')
+c      endif
+c
+cc first read blocks that are common for input type 1 and 2
+c
+      if (idebug.ge.2) write (66,*) ' starting zmat input'
+      call LineRead (0)
+
+cc read specific input for input type 1
+
+      if (inp_type.eq.1) then
+
+c     natomt is to account for dummy atoms
+         do while (WORD.NE.'NATOM')
+            call LineRead (15)
+            if (WORD.EQ.'END') then
+               write (66,*) 'natom must be defined'
+               close(66)
+               stop
+            endif
+         enddo
+         read (15,*) natom,natomt,ilin
+         if (natomt.gt.natommx) then
+            write (66,*) 'natomt too large',natomt,natommx
+            close(66)
+            stop
+         endif
+         rewind(15)
+
+         write (66,*) 'test0',natomt,atomlabel(1)
+
+         do while (WORD.NE.'CHARGE')
+            call LineRead (15)
+            if (WORD.EQ.'END') then
+               write (66,*) 'charge and spin must be defined'
+               close(66)
+               stop
+            endif
+         enddo
+         read (15,*) icharge,ispin
+         do iatom = 1 , natomt
+            read (15,'(A80)') atomlabel(iatom)
+         enddo
+         rewind(15)
+
+         do while (WORD.NE.'NTAU')
+            call LineRead (15)
+            if (WORD.EQ.'END') then
+               write (66,*) 'sampling coordinates must be defined'
+               stop
+            endif
+         enddo
+         read (15,*) ntau
+         rewind(15)
+         call  LineRead (0)
+
+         if (natom.ne.1) then
+            do while (WORD.NE.'INTCOOR')
+               call LineRead (15)
+               if (WORD.EQ.'END') then
+                  write (66,*) 'internal coordinates must be defined'
+                  close(66)
+                  stop
+               endif
+            enddo
+            ncoord = 3*natom-6-ntau
+            if (natom.eq.1) ncoord = 0
+            if (natom.eq.2) ncoord = 1
+            do icoord = 1 , ncoord
+               call LineRead (15)
+               intcoor(icoord) = word
+            enddo
+            rewind(15)
+         endif
+
+         do while (WORD.NE.'NTAU')
+            call LineRead (15)
+            if (WORD.EQ.'END') then
+               write (66,*) 'sampling coordinates must be defined'
+               close(66)
+               stop
+            endif
+         enddo
+         read (15,*) ntau
+         if (ntau.gt.ntaumx) then
+            write (66,*) 'ntau too large',ntau,ntaumx
+            close(66)
+            stop
+         endif
+         if (ntau.ne.0) then
+            read (15,*)
+            do itau = 1 , ntau
+               read (15,*) bislab(itau),taumn(itau),taumx(itau)
+               write (66,*) bislab(itau),taumn(itau),taumx(itau)
+               close(66)
+               open (unit=99,status='unknown')
+               rewind (99)
+               write (99,*)bislab(itau)
+               rewind (99)
+               call LineRead (99)
+               icoord=ncoord+itau
+               intcoor(icoord)=WORD
+               close (unit=99,status='keep')
+            enddo
+         endif
+         rewind(15)
+cc now read geometry parameters
+c         ncoord = 3*natom-6
+c         if(natom.eq.2) ncoord = 1
+c         if(natom.eq.1) ncoord = 0
+c         read (17,*)
+c         do icoord = 1 , ncoord
+cmore             call LineRead (17)
+c     xinti(icoord) = word
+c     intcoori(icoord) = word
+c            OPEN (unit=99,status='unknown')
+c            REWIND (99)
+c            WRITE (99,1000) WORD
+c 1000       FORMAT (A30)
+c            REWIND (99)
+c            READ (99,*) xint(icoord)
+c            close (unit=99,status='keep')
+c         enddo
+c         close (unit=17,status='keep')
+         close (unit=15,status='keep')
+
+      else if (inp_type.eq.2) then
+
+cc here we assume that the TS is not linear
+
+         ilin=0
+         ilin1=0
+         ilin2=0
+
+cc now read input of type 2
+         do while (WORD.NE.'CHARGE')
+            call LineRead (15)
+            if (WORD.EQ.'END') then
+               write (66,*) 'charge and spin must be defined'
+               close(66)
+               stop
+            endif
+         enddo
+         read (15,*) icharge,ispin
+         rewind(15)
+         call  LineRead (0)
+
+         nintcoord=0
+         do while (WORD.NE.'END')
+            call LineRead (15)
+            if (WORD.EQ.'INTCOORD') then
+               read (15,*) nintcoord
+               nlbend=0
+               do j=1,nintcoord
+                  call LineRead (15)
+                  if (WORD.EQ.'LBEND')then
+                     nlbend=nlbend+1
+                     angsub1=WORD2
+                     angsub2=WORD3
+                  endif
+               enddo
+            endif
+         enddo
+         rewind(15)
+         call  LineRead (0)
+
+c         write(*,*)'angsub1 ',angsub1
+c         write(*,*)'angsub2 ',angsub2
+c         stop
+
+         open (unit=25,file='./data/reac1.dat',status='old')
+
+         do while (WORD.NE.'NTAU')
+            call LineRead (25)
+            if (WORD.EQ.'END') then
+               write (66,*) 'sampling coords of reac1 must be defined'
+               close(66)
+               stop
+            endif
+         enddo
+         read (25,*) ntau1
+         rewind 25
+
+c     natomt is to account for dummy atoms
+         do while (WORD.NE.'NATOM')
+            call LineRead (25)
+            if (WORD.EQ.'END') then
+               write (66,*) 'natom in reac1 must be defined'
+               close(66)
+               stop
+            endif
+         enddo
+         read (25,*) natom1,natomt1,ilin1
+         close (25)
+
+cc get data from react2 file
+
+         if(iabs.eq.1.or.iadd.eq.1)then
+            open (unit=25,file='./data/reac2.dat',status='old')
+            
+            do while (WORD.NE.'NTAU')
+               call LineRead (25)
+               if (WORD.EQ.'END') then
+                  write (66,*) 'samp coords of reac2 must be defined'
+                  close(66)
+                  stop
+               endif
+            enddo
+            read (25,*) ntau2
+            rewind 25
+
+c     natomt is to account for dummy atoms
+            do while (WORD.NE.'NATOM')
+               call LineRead (25)
+               if (WORD.EQ.'END') then
+                  write (66,*) 'natom must be defined'
+                  close(66)
+                  stop
+               endif
+            enddo
+            read (25,*) natom2,natomt2,ilin2
+            close (25)
+         endif
+cc now we can determine the total number of atoms for the TS/wellr/wellp
+         if(iadd.eq.1.or.iabs.eq.1)then
+            natom = natom1+natom2
+         else if (iiso.eq.1.or.ibeta.eq.1.or.ibarr.eq.2)then
+            natom = natom1
+         endif
+cc modified         if (iadd.eq.1) natomt = natomt1+natomt2
+         if (iadd.eq.1) natomt = natomt1+natomt2
+         if (iabs.eq.1) natomt = natomt1+natomt2+1
+         if (iiso.eq.1) natomt = natomt1
+         if (ibeta.eq.1) natomt = natomt1
+         if (ibarr.eq.2) natomt = natomt1
+
+cc if linear molecule reacting with atom in abs assume TS is linear
+         if(iabs.eq.1.and.natom2.eq.1.and.ispecies.eq.0.
+     $      and.ilin1.eq.1) then
+            ilin=1
+         endif
+
+cc if linear molecule reacting with linear radical in abs assume TS is linear
+         if(iabs.eq.1.and.ilin2.eq.1.and.ispecies.eq.0.and
+     $      .ilin1.eq.1)then
+            ilin=1
+         endif
+c        natomt = natomt1+natomt2+1
+         
+         close (unit=15,status='keep')
+
+c natomt is to account for dummy atoms
+         if (natomt.gt.natommx) then
+            write (66,*) 'natomt too large',natomt,natommx
+            close(66)
+            stop
+         endif
+
+c gaussian com file data
+         read (17,*)
+         if (idebug.ge.2) write (66,*) ' starting gaussian input'
+         do iatom = 1 , natomt
+            read (17,'(A80)') atomlabel(iatom)
+         enddo
+
+cc read coordinate names
+
+         ncoord = 3*natom-6
+
+         do iint = 1 , ncoord
+            read (17,*) intcoor(iint),xint(iint)
+         enddo
+         close (unit=17,status='keep')
+
+cc read input for local es2k
+
+      else if (inp_type.eq.3) then
+
+c         write(66,*)'ok up to here'
+
+         do while (WORD.NE.'NATOM')
+            call LineRead (15)
+            if (WORD.EQ.'END') then
+               write (66,*) 'natom must be defined'
+               close(66)
+               stop
+            endif
+         enddo
+         read (15,*) natom,natomt,ilin
+         if (natomt.gt.natommx) then
+            write (66,*) 'natomt too large',natomt,natommx
+            close(66)
+            stop
+         endif
+         rewind(15)
+
+         do while (WORD.NE.'CHARGE')
+            call LineRead (15)
+            if (WORD.EQ.'END') then
+               write (66,*) 'charge and spin must be defined'
+               close(66)
+               stop
+            endif
+         enddo
+         read (15,*) icharge,ispin
+         do iatom = 1 , natomt
+            read (15,'(A80)') atomlabel(iatom)
+         enddo
+         rewind(15)
+
+         if (natom.ne.1) then
+            do while (WORD.NE.'INTCOOR')
+               call LineRead (15)
+               if (WORD.EQ.'END') then
+                  write (66,*) 'internal coordinates must be defined'
+                  close(66)
+                  stop
+               endif
+            enddo
+            ncoord = 3*natom-6
+            if (natom.eq.1) ncoord = 0
+            if (natom.eq.2) ncoord = 1
+            do icoord = 1 , ncoord
+               read(15,*) intcoor(icoord),xint(icoord)
+               intcoorM(icoord)=intcoor(icoord)
+               call upcase2(intcoorM(icoord))
+c               write(*,*)intcoor(icoord)
+            enddo
+            rewind(15)
+         endif
+         close (unit=15,status='keep')
+      endif
+
+      ncoord = 3*natom-6
+      do j=1,natomt
+         write(66,*)'atomlabel is ',atomlabel(j)
+      enddo
+      do j=1,ncoord
+         write(66,*)'coord is ',intcoor(j),xint(j)
+      enddo
+      close(66)
+c      stop
+
+cc initialize vectors
+c      do j=1,ncoord 
+      do j=1,natomt
+         bname(j)=''
+         anname(j)=''
+         dname(j)=''
+         bval(j)=0.
+         aval(j)=0.
+         dval(j)=0.
+      enddo
+      do j=1,natomt
+         ibconn(j)=0
+         iaconn(j)=0
+         idconn(j)=0
+      enddo
+cc
+      call read_zmat(atomlabel,natom,natomt,intcoorM,bislab,ibconn,
+     $ iaconn,idconn,bname,anname,dname,atname,idummy,isited,jsited,
+     $ ksited,bconnt,aconnt,dconnt)
+ 
+c      write(*,*)'bname is ',bname(2)
+c      write(*,*)'natomt is ',natomt
+c      write(*,*)'anname is ',anname(4)
+c      do j=1,natomt
+c         write(*,*) 'iaconn ',j,iaconn(j)
+c         write(*,*) 'idconn ',j,idconn(j)
+c      enddo
+c      stop
+cc this does not account for dummy atoms defined with  given quantities
+
+      do k=1,natomt
+         do j=1,ncoord
+            if(intcoor(j).eq.bname(k))bval(k)=xint(j)
+            if(intcoor(j).eq.anname(k))aval(k)=xint(j)
+            if(intcoor(j).eq.dname(k))dval(k)=xint(j)
+         enddo
+      enddo
+c      write(*,*)'aval4 is ',aval(4)
+
+
+cc all that follows is not necessary. we read the intial geometry
+cc I leave (coomented) it as it can be useful sooner or later
+
+cc   define starting xyz geometry. 
+cc   convention: atom 1 is is 0 0 0
+cc   atom 2 bd 0 0
+cc   atom 3 on xy plane 
+
+      coox(1)=0.
+      cooy(1)=0.
+      cooz(1)=0.
+      coox(2)=bval(2)
+      cooy(2)=0.
+      cooz(2)=0.
+      if(ibconn(3).eq.2) then
+         coox(3)=bval(2)-bval(3)*cos(aval(3)/180.*pigr)
+         cooy(3)=bval(3)*sin(aval(3)/180.*pigr)
+         cooz(3)=0.
+      else if(ibconn(3).eq.1)then
+         coox(3)=bval(3)*cos(aval(3)/180.*pigr)
+         cooy(3)=bval(3)*sin(aval(3)/180.*pigr)
+         cooz(3)=0.
+      else
+         write(*,*)'I am lost with this Z-Mat'
+         write(*,*)'in subroutine int_to_xyz'
+         write(*,*)'for species ',ispecies
+         stop
+      endif
+      xa=0.
+      ya=0.
+      za=0.
+      do j=4,natomt
+         call zmat_to_xyz(xa,ya,za,coox(ibconn(j)),cooy(ibconn(j)),
+     $ cooz(ibconn(j)),coox(iaconn(j)),cooy(iaconn(j)),
+     $ cooz(iaconn(j)),
+     $ coox(idconn(j)),cooy(idconn(j)),cooz(idconn(j)),
+     $ bval(j),aval(j),dval(j))
+         coox(j)=xa
+         cooy(j)=ya
+         cooz(j)=za
+c         write(*,*) j,coox(j),cooy(j),cooz(j)
+c         write(*,*)
+      enddo
+c      do j=1,natomt
+c         write(*,*) j,coox(j),cooy(j),cooz(j)
+c         write(*,*)
+c      enddo
+c      stop
+
+cc read the zmat from the level 1 output
+c      open(unit=18,file='geom_inp.xyz',status='unknown')
+c      read(18,*)natomcar
+c      read(18,*)cjunk
+c      do j=1,natomcar
+c         read(18,*)cjunk,coox(j),cooy(j),cooz(j)
+c         write(*,*)cjunk,coox(j),cooy(j),cooz(j)
+c      enddo
+c      close(18)
+cc we do not need a dummy atom check if there are no dummy atoms in the cart matrix
+c      if(natomcar.eq.natom)then
+c         do j=1,natomcar
+c            idummy(j)=0
+c         enddo
+c      endif
+c      natomt=natom
+
+cc this is a check that we can compute the xyz matrix and convert back to internal
+c      write(*,*)'ok1 '
+c      stop
+
+c      ntau=0
+c      ifilu=1
+c      call update_zmat(natom,natomt,intcoorM,bislab,ibconn,iaconn
+c     $    ,idconn,bname,anname,dname,atname,coox,cooy,cooz,xinti,tauopt,
+c     $     ntau,idummy,ilin_fr,aconnt,bconnt,dconnt,atomlabel,ifilu)
+c      if(xint(1).lt.1.0e-10)then
+c         write(66,*)
+c         write(66,*)'failed in updating geometry'
+c         write(66,*)'probably error of g09, check output'
+c         write(66,*)'stopping now'
+c         write(66,*)
+c         close(7)
+c         stop
+c      endif
+
+c      write(*,*)'ok2 '
+c      write(*,*)xinti(1)
+
+
+c      open(unit=10,file='temp1.xyz',status='unknown')
+c      do j=1,ncoord
+c         write(10,*)intcoor(j),xint(j),xinti(j),abs(xint(j)-xinti(j))
+c      enddo
+c      close(10)
+
+c      do j=1,ncoord
+c         xint(j)=xinti(j)
+c      enddo
+
+c      stop
+
+c      open(unit=10,file='temp2.xyz',status='unknown')
+c      write(10,*)natom
+c      write(10,*)'test'
+c      inda=0
+c      do j=1,natom
+c         aname1(j)=atname(j)
+c         if(idummy(j).ne.1)then
+c            inda=inda+1
+c      endif
+c      write(10,*)aname1(inda),coox(j),cooy(j),cooz(j)
+c      enddo
+c      close(10)
+
+
+cc now we update the coordinates using those transformed in our procedure for consistentcy
+cc with dimension of dihedral angles
+
+
+
+      open(unit=10,file='geom_xyz.dat',status='unknown')
+      write(10,*)natom
+      write(10,*)'xyz taken from ',nameout
+c      inda=0
+      do j=1,natomt
+         write(10,100)atname(j),coox(j),cooy(j),cooz(j)
+      enddo
+c      write(10,*)
+c      do j=1,ncoord
+c         aname1(j)=atname(j)
+c         if(idummy(j).ne.1)then
+c            inda=inda+1
+c         endif
+c         write(10,100)intcoor(j),xint(j)
+c      enddo
+      close(10)
+
+
+
+c      ncoord=3*natom-6
+c      do j=1,ncoord
+c         xint(j)=xinti(j)
+c      enddo
+
+c      open(unit=10,file='zmat.com',status='unknown')
+c      write(10,*)natom
+c      write(10,*)'z-matrix taken from ',nameout
+c      inda=0
+c      do j=1,natomt
+c         write(10,*)atomlabel(j)
+c      enddo
+c      write(10,*)
+c      do j=1,ncoord
+c         aname1(j)=atname(j)
+c         if(idummy(j).ne.1)then
+c            inda=inda+1
+c         endif
+c         write(10,100)intcoor(j),xint(j)
+c      enddo
+c      close(10)
+
+ 100  format(A4,1X,3(F12.6))
+
+      if (ispecies.eq.666) then
+         command1='rm -f fort.99'
+         call commruns(command1)
+      endif
+      return
+      END
+
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 cmdt thermo 
       subroutine thermo(ispecies,iprintall)
@@ -32962,8 +33806,8 @@ cmdt thermo
       dimension drea(noptmx)
 
       character*300 comline1,comline2,copystuff
-      character*60 atomlabel(natommx)
-      character*60 atomlabel1(natommx)
+      character*80 atomlabel(natommx)
+      character*80 atomlabel1(natommx)
       character*30 intcoor(3*natommx)
       character*30 intcoors(3*natommx)
       character*20 bislab(ntaumx)
