@@ -39,12 +39,12 @@ c     parameter (ntaumx=10, nmdmx=300, natommx=100, ndim=3)
       dimension coord(natommx,ndim),xint(3*natommx),abcrot(ndim)
       dimension coox(natommx),cooy(natommx),cooz(natommx)
       dimension ibconn(natommx),iaconn(natommx),idconn(natommx)
-      dimension idummy(natommx)
+      dimension idummy(natommx),icordummy(natommx)
       dimension grad(3*natommx)
       character*30 gkeyword,igkey
       character*(*) comline1,comline2
       character*30 gmemo
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*60 irconslabel
       character*30 intcoor(3*natommx)
       character*20 bislab(ntaumx)
@@ -225,10 +225,11 @@ c      stop
 cc if using redundant coordinates then read z-matrix
 
 c disable redundant coord if using dummy atoms in reactants
+cc not necessary anymore
 
       if(natomt.ne.natom)then
          if(ibeta.eq.1.or.iiso.eq.1)then
-            ired=0
+c            ired=0
          else if (iadd.eq.1)then
             if((natomt-1).ne.natom)then
 c               ired=0
@@ -250,6 +251,9 @@ cc determine of the optimization is to be done in internal coords
 
 c      write(*,*)'ok up to here 1'
 c      write(*,*)'ired is',ired
+c      write(*,*)'ircons is',ircons
+c      stop
+
 c      write(*,*)'ired_check1 is',ired_check1
 c      write(*,*)'ired_check2 is',ired_check2
 c
@@ -349,9 +353,8 @@ cc         write(*,*)'pass from here'
          ired=1
       endif
 
-      write(*,*)'ok up to here 2'
-      command1='echo $PWD'
-      call commrun(command1)         
+c      command1='echo $PWD'
+c      call commrun(command1)         
 
       OPEN(UNIT=10,STATUS='unknown',FILE='geom.com')
       REWIND (10)
@@ -596,32 +599,32 @@ c        a file will be used to storage these
             write (10,*) bislab(itau), tau(itau)
          enddo
          icoord = natom*3-6
-         if (ircons.eq.1) then
+         if (ircons.eq.1.and.ired.eq.0) then
             write (10,*)
             write (10,*) intcoor(icoord),xint(icoord)
-         else if (ircons.eq.2) then
+         else if (ircons.eq.2.and.ired.eq.0) then
             write (10,*)
             write (10,*) intcoor(icoord-1),xint(icoord-1)
             write (10,*) intcoor(icoord),xint(icoord)
-         else if (ircons.eq.3) then
+         else if (ircons.eq.3.and.ired.eq.0) then
             write (10,*)
             write (10,*) intcoor(icoord-2),xint(icoord-2)
             write (10,*) intcoor(icoord-1),xint(icoord-1)
             write (10,*) intcoor(icoord),xint(icoord)
-         else if (ircons.eq.4) then
+         else if (ircons.eq.4.and.ired.eq.0) then
             write (10,*)
             write (10,*) intcoor(icoord-3),xint(icoord-3)
             write (10,*) intcoor(icoord-2),xint(icoord-2)
             write (10,*) intcoor(icoord-1),xint(icoord-1)
             write (10,*) intcoor(icoord),xint(icoord)
-         else if (ircons.eq.5) then
+         else if (ircons.eq.5.and.ired.eq.0) then
             write (10,*)
             write (10,*) intcoor(icoord-4),xint(icoord-4)
             write (10,*) intcoor(icoord-3),xint(icoord-3)
             write (10,*) intcoor(icoord-2),xint(icoord-2)
             write (10,*) intcoor(icoord-1),xint(icoord-1)
             write (10,*) intcoor(icoord),xint(icoord)
-         else if (ircons.gt.5) then
+         else if (ircons.gt.5.and.ired.eq.0) then
             write (10,*)
             do j=1,ircons
                index_nf=ircons-j
@@ -630,7 +633,120 @@ c        a file will be used to storage these
             enddo
          endif
 c         write (10,*)
+         if(ired.eq.1.and.ircons.gt.0)then
+            ncoord = natom*3-6
+            do j=1,ircons
+               write (10,*) intcoor(ncoord-ircons+j),
+     +                       xint(ncoord-ircons+j)
+            enddo
+            write(10,*)
+            iatfix=0
+            iatc=0
+            do j=1,natomt
+               icordummy(j)=0.
+            enddo
+            iprog=0
+            do j=1,natomt
+               icordummy(j)=iprog
+               if(idummy(j).eq.1)then
+                  iprog=iprog+1
+                  icordummy(j)=iprog
+               endif
+            enddo
+c            do j=1,natomt
+c               write(*,*)'icordummy(j) ',icordummy(j)
+c            enddo
+c            stop
+            if(ircons.eq.1)then
+cc            check bond
+               do j=1,ncoord
+                  if(intcoor(ncoord).eq.bname(j))iatfix=j
+               enddo
+               iatc=iatfix-icordummy(iatfix)
+c               write(10,801)iatfix,ibconn(iatfix)
+               write(10,801)iatc,
+     +               ibconn(iatfix)-icordummy(ibconn(iatfix))
+               if(iatfix.eq.0)then
+c     c            check angle
+                  do j=1,ncoord
+                     if(intcoor(ncoord).eq.anname(j))iatfix=j
+                  enddo
+                  iatc=iatfix-icordummy(iatfix)
+c                  write(10,802)iatfix,ibconn(iatfix),iaconn(iatfix)
+                  write(10,802)iatc,
+     +               ibconn(iatfix)-icordummy(ibconn(iatfix)),
+     +               iaconn(iatfix)-icordummy(iaconn(iatfix))
+               endif
+               if(iatfix.eq.0)then
+c     c            check dihedral
+                  do j=1,ncoord
+                     if(intcoor(ncoord).eq.dname(j))iatfix=j
+                  enddo
+c                  write(10,803)iatfix,ibconn(iatfix),iaconn(iatfix),
+c     +                         idconn(iatfix)
+                  iatc=iatfix-icordummy(iatfix)
+                  write(10,803)iatc,
+     +               ibconn(iatfix)-icordummy(ibconn(iatfix)),
+     +               iaconn(iatfix)-icordummy(iaconn(iatfix)),
+     +               idconn(iatfix)-icordummy(idconn(iatfix))
+               endif
+            endif
+            if(ircons.gt.1)then
+               do ij=1,ircons
+cc            check bond
+                  iatfix=0
+                  do j=1,ncoord
+                     if(intcoor(ncoord-ij+1).eq.bname(j))iatfix=j
+                  enddo
+                  if(iatfix.ne.0)then
+                     iatc=iatfix-icordummy(iatfix)
+c                     write(10,801)iatfix,ibconn(iatfix)
+                     write(10,801)iatc,ibconn(iatfix)
+     +                        -icordummy(ibconn(iatfix))
+                  endif
+                  if(iatfix.eq.0)then
+c     c            check angle
+                     do j=1,ncoord
+                        if(intcoor(ncoord-ij+1).eq.anname(j))iatfix=j
+                     enddo
+                     if(iatfix.ne.0)then
+c                       write(10,802)iatfix,ibconn(iatfix),iaconn(iatfix)
+                        iatc=iatfix-icordummy(iatfix)
+                        write(10,802)iatc,
+     +                       ibconn(iatfix)-icordummy(ibconn(iatfix)),
+     +                       iaconn(iatfix)-icordummy(iaconn(iatfix))
+                     endif
+                  endif
+                  if(iatfix.eq.0)then
+c     c            check dihedral
+                     do j=1,ncoord
+                        if(intcoor(ncoord-ij+1).eq.dname(j))iatfix=j
+                     enddo
+                     if(iatfix.ne.0)then
+c                      write(10,803)iatfix,ibconn(iatfix),iaconn(iatfix),
+c     +                    idconn(iatfix)
+                        iatc=iatfix-icordummy(iatfix)
+                        write(10,803)iatc,
+     +                       ibconn(iatfix)-icordummy(ibconn(iatfix)),
+     +                       iaconn(iatfix)-icordummy(iaconn(iatfix)),
+     +                       idconn(iatfix)-icordummy(idconn(iatfix))
+                      endif
+                  endif
+               enddo
+            endif
+c            write(*,*)'the constr is for atom ',iatfix
+c            write(*,*)'the constr is: ',iatfix,ibconn(iatfix)
+c            close(10)
+c            write(10,*)
+c            stop
+         endif
+c         ircons=0
       endif
+
+ 801  format (I3,1X,I3,' F')
+ 802  format (I3,1X,I3,1X,I3,' F')
+ 803  format (I3,1X,I3,1X,I3,1X,I3' F')
+
 c
       icheckdummy=0
       if(natomt.ne.natom)then
@@ -756,6 +872,12 @@ c         write (10,*) '#','guess=read geom=allcheck ChkBasis'
          command1=
      &    "sed -i -E ':a;N;$!ba;s/guess=mix/ /2' geom.com"
          call commrun(command1)
+         command1=
+     &    "sed -i -E ':a;N;$!ba;s/checkpoint/ /2' geom.com"
+         call commrun(command1)
+cc         command1=
+cc     &    "sed -i -E ':a;N;$!ba;s/check/ /2' geom.com"
+cc         call commrun(command1)
          command1=
      &    "sed -i -E ':a;N;$!ba;s/mix/ /2' geom.com"
          call commrun(command1)

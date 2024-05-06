@@ -21,7 +21,7 @@ c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 c      integer ibconn
       dimension ibconn(natommx),iaconn(natommx),idconn(natommx)
       dimension idummy(natommx)
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*30 intcoor(3*natommx)
       character*20 bislab(ntaumx)
       character*20 bname(natommx),anname(natommx),dname(natommx)
@@ -186,7 +186,7 @@ c
       character*20 bname(natommx),anname(natommx),dname(natommx)
      $ ,atname(natommx),bconnt(natommx),aconnt(natommx),dconnt(natommx)
       LOGICAL leof,lsec,ltit
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
 
       CHARACTER*1000 line,string
       CHARACTER*160 sename,word,word2,word3
@@ -204,6 +204,7 @@ c      stop
       do j=1,nint
          xintt(j)=xint(j)
          xint(j)=0.
+c         write(*,*)' xint is ',xintt(j)
       enddo
  
       do j=1,ntau
@@ -252,8 +253,8 @@ cc first introduce fake coordinates for dummy atoms
 cc to be consistent with numering in input z-mat
 
       ind=0
-      iangname=0
       do j=1,natomt
+         iangname=0
 c         write(*,*)'idummy is ', j,idummy(j)
          if(idummy(j).eq.0) then
             ind=ind+1
@@ -445,9 +446,12 @@ c            write (99,*) anname(j)
                do ij=1,nint
                   if(intcoor(ij).eq.dname(j))then
                      iangname=1
-c                     write(99,*)'iname is ',iname
-c                     write (99,*) xintt(ij)
-                     dihed=xintt(ij)
+c                     write(6,*)'dname is ',ij,dname(j)
+c                    write(6,*)'dname coord is ',xintt(ij)
+c                     write (6,*) xintt(ij)
+cc                     write(99,*)'dname is ',dname(j)
+cc                     write (99,*) xintt(ij)
+c                     dihed=xintt(ij)
 c                     stop
                   endif
                enddo
@@ -519,7 +523,10 @@ c                  write(*,*)'iat3 ', iat3
                   do ij=1,nint
 c                     if(intcoor(ij).eq.anname(j+1))then
                      if(intcoor(ij).eq.anname(jind))then
+                        write (*,*)'when analyzing atom ',j
                         write (*,*)'failed to recog dummy 2 ang conf'
+                        write (*,*)'intcoor: ',intcoor(ij)
+                        write (*,*)'anname: ',anname(jind)
                         write (*,*)'stopping now'
                         stop
                      endif
@@ -569,6 +576,7 @@ c               stop
             cooxt(j)=xa
             cooyt(j)=ya
             coozt(j)=za
+c            write(*,*)'the coords of at j are: ',j
 c            write(*,*)'xa is ,',xa
 c            write(*,*)'ya is ,',ya
 c            write(*,*)'za is ,',za
