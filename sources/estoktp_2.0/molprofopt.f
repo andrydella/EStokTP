@@ -35,7 +35,7 @@ c     parameter (ntaumx=10, nmdmx=300, natommx=100, ndim=3)
       character*100 command1
       character*30 gmemo
       character*30 cjunk
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*80 irconslabel
       character*60 label
       character*30 intcoor(3*natommx)
@@ -971,8 +971,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       character*70 comline3
       character*70 comline4
       character*120 command1
-      character*60 atomlabel(natommx)
-      character*60 atomlabelg(natommx)
+      character*80 atomlabel(natommx)
+      character*80 atomlabelg(natommx)
 
       LOGICAL leof,lsec,ltit
 

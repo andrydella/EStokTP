@@ -95,7 +95,7 @@ C     *****************************
       character*70 comline1,comline2
       character*70 comline3,comline4
       character*30 intcoor(3*natommx)
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*20 bislab(ntaumx)
       character*30 cjunk
       character*30 gmem
@@ -124,7 +124,7 @@ c      stop
       read(15,*)natom,natomt,np,nconst
 
       do j=1,natomt
-         read(15,'(A70)')atomlabel(j)
+         read(15,'(A80)')atomlabel(j)
       enddo
       do j=1,np
          read(15,*)intcoor(j),xint(j),ibond(j)
@@ -268,7 +268,7 @@ C     *****************************
       character*70 comline1,comline2
       character*70 comline3,comline4
       character*30 intcoor(3*natommx)
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*20 bislab(ntaumx)
       character*30 cjunk
       character*30 gmem
@@ -295,7 +295,7 @@ c      stop
       read(15,*)natom,natomt,np,nconst
 
       do j=1,natomt
-         read(15,'(A70)')atomlabel(j)
+         read(15,'(A80)')atomlabel(j)
       enddo
       do j=1,np
          read(15,*)intcoor(j),xint(j),ibond(j)
@@ -455,7 +455,7 @@ C     *****************************
 
       character*30 cjunk
       character*100 commandcopy
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
 
 c      implicit none
 c      integer n
@@ -546,7 +546,7 @@ C     *****************************
 
       character*30 cjunk
       character*100 commandcopy
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
 
 c      implicit none
 c      integer n
@@ -700,7 +700,7 @@ C     *****************************
       character*70 comline1,comline2
       character*70 comline3,comline4
       character*30 intcoor(3*natommx)
-      character*60 atomlabel(natommx)
+      character*80 atomlabel(natommx)
       character*20 bislab(ntaumx)
       character*30 cjunk
       character*30 namepes1,namepes2
@@ -758,7 +758,7 @@ c         write(7,*)commandcopy
       open (unit=15,file='./output/na_mecp.out',status='unknown')
       read(15,*)cjunk
       do j=1,natomt
-         read(15,'(A70)')atomlabel(j)
+         read(15,'(A80)')atomlabel(j)
       enddo
       do j=1,np
          read(15,*)intcoor(j),xint(j)
