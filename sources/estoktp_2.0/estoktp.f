@@ -31153,7 +31153,7 @@ c parameter initialization
       iprod_geom=0
       iaspace=0
 
-      iadd=1
+      iadd_gsm=1
       ibreak=1
       inumbond=1
       iang=1
@@ -31217,11 +31217,11 @@ c check if info is given to write isomers file ADDED KEYWORDS
             call LineRead (25)
             if (WORD.EQ.'END') then
                write (26,*) 'no add keword found'
-               iadd=0
+               iadd_gsm=0
                exit
             endif
          enddo
-         if (iadd.NE.0) then
+         if (iadd_gsm.NE.0) then
             open (unit=57,file='addedbonds.tmp',status='unknown')
             read (25,*) iadded
             do j=1,iadded
@@ -31594,7 +31594,7 @@ c      enddo
          open (unit=59,file='./ISOMERS0001',status='unknown')
 
          write (59,*) 'NEW'
-         if (iadd.EQ.0) then
+         if (iadd_gsm.EQ.0) then
             write (59,*) 'ADD ',isite,ireact
          else
             open (unit=57,file='addedbonds.tmp',status='unknown')
