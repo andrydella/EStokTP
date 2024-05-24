@@ -31810,7 +31810,7 @@ coadl copy everything into gsm/ and interesting stuff into output
                write (26,*) 'Did not find stringfile.xyz0001'
                stop
             endif
-            open (unit=59,file='./stringfile.xyz0001',status='unknown')
+            open (unit=59,file='./gsm/stringfile.xyz0001',status='unknown')
             zen = -99999.99
             zmaxen = -99999.99
             inodets = 0
