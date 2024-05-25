@@ -31794,7 +31794,7 @@ coadl copy everything into gsm/ and interesting stuff into output
          call commrun(command1)
          command1='mv inpfileq gstart initial0001.xyz ./gsm/'
          call commrun(command1)
-         command1='cp  stringfile.xyz0001 ./geoms/traj_gsm.xyz'
+         command1='cp  stringfile.xyz0001 ./geoms/gsm_traj.xyz'
          call commrun(command1)
          command1='mv  stringfile.xyz0001 stringfile.xyz0001fr ./gsm/'
          call commrun(command1)
@@ -31802,10 +31802,10 @@ coadl copy everything into gsm/ and interesting stuff into output
             command1='mv  ISOMERS0001 ./gsm/'
             call commrun(command1)
          endif
-         inquire(FILE='./scratch/tsq0001.xyz', EXIST=ex)
+         inquire(FILE='./gsm/scratch/tsq0001.xyz', EXIST=ex)
          if (.not.ex) then
             write (26,*) 'Did not find tsq0001.xyz file'
-            inquire(FILE='./stringfile.xyz0001', EXIST=ex)
+            inquire(FILE='./gsm/stringfile.xyz0001', EXIST=ex)
             if (.not.ex) then
                write (26,*) 'Did not find stringfile.xyz0001'
                stop
@@ -31862,17 +31862,18 @@ c                  return
          write (26,*) 'Done :)'
       else
          write (26,*) 'Skipped GSM calculation :) | Recovery now'
-         command1='cp  gsm/stringfile.xyz0001 '// 
-     $    './geoms/traj_gsm.xyz'
+         command1='cp  ./gsm/stringfile.xyz0001 '// 
+     $    './geoms/gsm_traj.xyz'
          call commrun(command1)
          inquire(FILE='./gsm/scratch/tsq0001.xyz', EXIST=ex)
          if (.not.ex) then
             write (26,*) 'Did not find tsq0001.xyz file'
+            inquire(FILE='./gsm/stringfile.xyz0001', EXIST=ex)
             if (.not.ex) then
                write (26,*) 'Did not find stringfile.xyz0001'
                stop
             endif
-            open (unit=59,file='gsm/stringfile.xyz0001',
+            open (unit=59,file='./gsm/stringfile.xyz0001',
      $         status='unknown')
             zen = -99999.99
             zmaxen = -99999.99
